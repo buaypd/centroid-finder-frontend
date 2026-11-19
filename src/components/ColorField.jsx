@@ -20,7 +20,7 @@ export default function ColorField({ value, onChange }) {
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={(e) => commit(e.target.value)}
-      onKeyDown={(e) => e.key === 'Enter' && commit(e.currentTarget.value)}
+      onKeyDown={(e) => e.key === 'Enter' && commit(e.target.value)}
       spellCheck={false}
       sx={{ flex: 1, minWidth: 0 }}
       slotProps={{
