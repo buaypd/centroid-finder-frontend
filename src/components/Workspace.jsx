@@ -522,7 +522,7 @@ export default function Workspace({ filename }) {
             onClick={runDetection}
             disabled={starting || job.status === 'processing'}
           >
-            {job.status === 'processing' ? 'Processing…' : starting ? 'Starting…' : 'Run detection'}
+            {job.status === 'processing' ? 'Processing…' : starting ? 'Starting…' : 'Process Video with These Settings'}
           </button>
           <p className="muted small">
             Sends <span className="mono">#{targetColor}</span> and threshold{' '}
@@ -564,7 +564,7 @@ function previewHint(stats) {
   if (stats.groups > 50 && stats.largest < stats.framePixels * 0.001) {
     return { level: 'warn', text: 'Lots of tiny specks and no clear blob. Try sampling a more typical part of the object.' };
   }
-  return { level: 'good', text: 'Looks trackable. Scrub through the video to check other frames, then run detection.' };
+  return { level: 'good', text: 'Looks trackable. Scrub through the video to check other frames, then process the video.' };
 }
 
 function JobCard({ job, run, summary, trackError, settingsChanged, onRestore }) {

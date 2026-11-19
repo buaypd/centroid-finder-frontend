@@ -25,7 +25,7 @@ http://localhost:3000. Express serves `client/dist`.
    sees. The yellow crosshair is the largest blob's centroid in the current
    frame, computed in the browser with the same math as the Java code.
 4. Scrub or step through frames (`←`/`→`) to check that the settings hold up.
-5. **Run detection** starts a job. When it finishes, the pink path shows where
+5. **Process Video with These Settings** starts a job. When it finishes, the pink path shows where
    the processor tracked the object, the chart plots x/y over time (click to
    seek, red bands = not found), and you can download the CSV.
 
