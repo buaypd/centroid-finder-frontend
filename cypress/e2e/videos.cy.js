@@ -15,9 +15,9 @@ describe('Video Chooser (/videos)', () => {
     cy.visit('/videos');
     cy.wait('@videos');
 
-    cy.contains('2 videos');
-    cy.contains('salamander1.mp4');
-    cy.contains('forest_intro.mp4');
+    cy.contains('2 items');
+    cy.contains('salamander1');
+    cy.contains('forest_intro');
   });
 
   it('opens /preview/:filename when a video is clicked', () => {
@@ -25,7 +25,7 @@ describe('Video Chooser (/videos)', () => {
     cy.intercept('GET', '/videos/*', { statusCode: 404 });
     cy.visit('/videos');
 
-    cy.contains('salamander1.mp4').click();
+    cy.contains('salamander1').click();
     cy.location('pathname').should('eq', '/preview/salamander1.mp4');
   });
 
@@ -35,15 +35,15 @@ describe('Video Chooser (/videos)', () => {
 
     cy.get('input[aria-label="Search videos"]').type('forest');
     cy.location('search').should('eq', '?q=forest');
-    cy.contains('1 of 2 videos match');
-    cy.contains('forest_intro.mp4');
-    cy.contains('salamander1.mp4').should('not.exist');
+    cy.contains('1 of 2 match');
+    cy.contains('forest_intro');
+    cy.contains('salamander1').should('not.exist');
 
     cy.get('input[aria-label="Search videos"]').type('{selectall}zzz');
     cy.contains('No videos match your search');
 
     cy.get('input[aria-label="Search videos"]').clear();
-    cy.contains('2 videos');
+    cy.contains('2 items');
   });
 
   it('searching from a preview page takes you to the library', () => {
@@ -53,7 +53,7 @@ describe('Video Chooser (/videos)', () => {
 
     cy.get('input[aria-label="Search videos"]').type('forest');
     cy.location('pathname').should('eq', '/videos');
-    cy.contains('1 of 2 videos match');
+    cy.contains('1 of 2 match');
   });
 
   it('has a Library tab that returns to the library', () => {

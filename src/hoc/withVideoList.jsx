@@ -1,24 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Alert, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { listVideos } from '../api.js';
+import { onVideosChanged } from '../lib/videoEvents.js';
 
 // Higher-order component: takes a component and returns a new one that
 // fetches GET /api/videos and handles the loading, error and empty states.
 // The wrapped component only renders when there are videos, and receives
 //   videos    - array of filenames
+//   updatedAt - Date of the last successful load
 //   onRefresh - function that reloads the list
 // plus whatever props the caller passed.
 export default function withVideoList(WrappedComponent) {
   function WithVideoList(props) {
     const [videos, setVideos] = useState(null);
     const [error, setError] = useState(null);
+    const [updatedAt, setUpdatedAt] = useState(null);
     const [reloadKey, setReloadKey] = useState(0);
 
     useEffect(() => {
       let cancelled = false;
       setError(null);
       listVideos()
-        .then((list) => !cancelled && setVideos(list))
+        .then((list) => {
+          if (cancelled) return;
+          setVideos(list);
+          setUpdatedAt(new Date());
+        })
         .catch((err) => !cancelled && setError(err.message));
       return () => {
         cancelled = true;
@@ -26,6 +33,9 @@ export default function withVideoList(WrappedComponent) {
     }, [reloadKey]);
 
     const refresh = () => setReloadKey((k) => k + 1);
+
+    // Reload when a video is uploaded from the nav bar.
+    useEffect(() => onVideosChanged(() => setReloadKey((k) => k + 1)), []);
     const retry = (
       <Button color="inherit" size="small" onClick={refresh}>
         Refresh
@@ -58,7 +68,7 @@ export default function withVideoList(WrappedComponent) {
       );
     }
 
-    return <WrappedComponent {...props} videos={videos} onRefresh={refresh} />;
+    return <WrappedComponent {...props} videos={videos} updatedAt={updatedAt} onRefresh={refresh} />;
   }
 
   WithVideoList.displayName = `withVideoList(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;

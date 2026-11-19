@@ -25,11 +25,8 @@ function VideoChooserPage() {
 
   return (
     <>
-      <Typography variant="h4" component="h1">
-        Videos
-      </Typography>
-      <Typography color="text.secondary" mb={2.5}>
-        Pick a video, click the object you want to follow, and tune the threshold until only it lights up.
+      <Typography variant="h4" component="h1" mb={3}>
+        Your videos
       </Typography>
       <VideoLibrary onSelect={handleSelect} query={searchParams.get("q") ?? ""} />
     </>

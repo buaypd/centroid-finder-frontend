@@ -17,6 +17,38 @@ export async function listVideos() {
   return res.json();
 }
 
+// POST /api/videos (multipart, field "video") -> filename.
+// Uses XMLHttpRequest because fetch can't report upload progress.
+// `onProgress` gets a number from 0 to 100; `signal` cancels the upload.
+export function uploadVideo(file, onProgress, signal) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/videos');
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      let body = null;
+      try {
+        body = JSON.parse(xhr.responseText);
+      } catch {
+        // not JSON; use the fallback message below
+      }
+      if (xhr.status === 201 && body?.filename) resolve(body.filename);
+      else reject(new Error(body?.error || `Upload failed (${xhr.status})`));
+    };
+    xhr.onerror = () => reject(new Error('Could not reach the server.'));
+    xhr.onabort = () => reject(new DOMException('Upload cancelled', 'AbortError'));
+
+    signal?.addEventListener('abort', () => xhr.abort());
+
+    const form = new FormData();
+    form.append('video', file);
+    xhr.send(form);
+  });
+}
+
 export const thumbnailUrl = (filename) => `/thumbnail/${enc(filename)}`;
 export const videoUrl = (filename) => `/videos/${enc(filename)}`;
 

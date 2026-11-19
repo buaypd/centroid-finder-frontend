@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link as RouterLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppBar, Box, Button, InputAdornment, TextField, Toolbar, Typography } from '@mui/material';
+import { notifyVideosChanged } from '../lib/videoEvents.js';
+import UploadDialog from './UploadDialog.jsx';
 
 // Top navigation: brand, a Library tab, the open video's name, and a search
 // box. Typing in the search box goes to /videos?q=<text>, and the library
@@ -15,11 +17,20 @@ export default function NavBar() {
   const selected = match ? decodeURIComponent(match[1]) : null;
 
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   // Keep the box in step with the URL (back/forward, links, clearing).
   useEffect(() => {
     if (onLibrary) setQuery(searchParams.get('q') ?? '');
   }, [onLibrary, searchParams]);
+
+  // After an upload, show the library (unfiltered) with the new video in it.
+  function handleUploaded() {
+    setUploadOpen(false);
+    setQuery('');
+    notifyVideosChanged();
+    navigate('/videos');
+  }
 
   function search(text) {
     setQuery(text);
@@ -88,7 +99,13 @@ export default function NavBar() {
             },
           }}
         />
+
+        <Button variant="outlined" color="inherit" onClick={() => setUploadOpen(true)}>
+          Upload <span aria-hidden="true">&nbsp;↑</span>
+        </Button>
       </Toolbar>
+
+      <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={handleUploaded} />
     </AppBar>
   );
 }
