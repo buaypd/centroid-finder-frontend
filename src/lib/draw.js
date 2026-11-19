@@ -62,6 +62,20 @@ export function drawCrosshair(ctx, { x, y }, scale, color = COLORS.preview) {
   ctx.restore();
 }
 
+// A filled dot with a contrasting ring, visible on both black and white.
+export function drawDot(ctx, { x, y }, scale, color = '#ff2d55') {
+  if (x < 0 || y < 0) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y, 7 * scale, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.lineWidth = 2.5 * scale;
+  ctx.strokeStyle = '#00e5ff';
+  ctx.stroke();
+  ctx.restore();
+}
+
 function strokeRows(ctx, rows, from, to) {
   ctx.beginPath();
   let penDown = false;

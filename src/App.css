@@ -181,6 +181,22 @@ h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color
 
 .stage-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 
+.preview-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.preview-pair figure { margin: 0; min-width: 0; }
+.preview-pair canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
+  border-radius: var(--radius);
+}
+.preview-pair figcaption { margin-top: 6px; font-size: 0.85rem; }
+.preview-pair > p { grid-column: 1 / -1; margin: 0; }
+
 .stage {
   position: relative;
   width: 100%;

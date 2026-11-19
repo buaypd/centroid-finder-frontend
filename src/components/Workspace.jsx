@@ -14,6 +14,7 @@ import { formatPercent, formatTime } from '../lib/format.js';
 import { clearSavedJob, loadSavedJob, saveJob } from '../lib/savedJobs.js';
 import { parseTrackCsv, summarize } from '../lib/track.js';
 import ColorField from './ColorField.jsx';
+import PreviewPair from './PreviewPair.jsx';
 import TrackChart from './TrackChart.jsx';
 
 const VIEW_MODES = [
@@ -340,6 +341,7 @@ export default function Workspace({ filename }) {
   return (
     <div className="workspace">
       <section className="stage-col">
+        <PreviewPair filename={filename} targetColor={targetColor} threshold={threshold} />
         <div
           className="stage"
           style={videoInfo ? { aspectRatio: `${videoInfo.width} / ${videoInfo.height}` } : undefined}
