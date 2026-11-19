@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -16,17 +17,24 @@ import { loadSavedJob } from '../lib/savedJobs.js';
 
 // Presentational: draws the grid for the `videos` it is given. Fetching and
 // the loading / error / empty states live in the withVideoList HOC.
-function VideoLibrary({ videos, onSelect, onRefresh }) {
+function VideoLibrary({ videos: allVideos, query = '', onSelect, onRefresh }) {
+  const needle = query.trim().toLowerCase();
+  const videos = needle ? allVideos.filter((name) => name.toLowerCase().includes(needle)) : allVideos;
+
   return (
     <section className="library">
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography color="text.secondary">
-          {videos.length} {videos.length === 1 ? 'video' : 'videos'}
+          {needle
+            ? `${videos.length} of ${allVideos.length} videos match “${query.trim()}”`
+            : `${videos.length} ${videos.length === 1 ? 'video' : 'videos'}`}
         </Typography>
         <Button variant="outlined" color="inherit" onClick={onRefresh}>
           Refresh
         </Button>
       </Stack>
+
+      {videos.length === 0 && <Alert severity="info">No videos match your search.</Alert>}
 
       <Grid container spacing={2.5} component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
         {videos.map((name) => {

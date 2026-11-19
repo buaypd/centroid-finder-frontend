@@ -5,17 +5,19 @@ import {
   Navigate,
   useNavigate,
   useParams,
-  useLocation,
+  useSearchParams,
 } from "react-router-dom";
 
-import { AppBar, Box, Breadcrumbs, Button, Link, Toolbar, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
+import NavBar from "./components/NavBar.jsx";
 import VideoLibrary from "./components/VideoLibrary.jsx";
 import Workspace from "./components/Workspace.jsx";
 
-// Displays the available videos.
+// Displays the available videos, filtered by the nav bar's search (?q=).
 function VideoChooserPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   function handleSelect(filename) {
     navigate(`/preview/${encodeURIComponent(filename)}`);
@@ -29,7 +31,7 @@ function VideoChooserPage() {
       <Typography color="text.secondary" mb={2.5}>
         Pick a video, click the object you want to follow, and tune the threshold until only it lights up.
       </Typography>
-      <VideoLibrary onSelect={handleSelect} />
+      <VideoLibrary onSelect={handleSelect} query={searchParams.get("q") ?? ""} />
     </>
   );
 }
@@ -43,44 +45,9 @@ function PreviewPage() {
 
 // Shared layout containing the header and page routes.
 function AppLayout() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Determine which video is selected from the URL.
-  const match = location.pathname.match(/^\/preview\/([^/]+)$/);
-
-  const selected = match ? decodeURIComponent(match[1]) : null;
-
   return (
     <div className="app">
-      <AppBar>
-        <Toolbar sx={{ gap: 2.5 }}>
-          <Button
-            color="inherit"
-            onClick={() => navigate("/videos")}
-            title="Back to library"
-            startIcon={
-              <Box component="span" aria-hidden="true" sx={{ color: "secondary.main", fontSize: "1.3rem" }}>
-                ◎
-              </Box>
-            }
-            sx={{ fontWeight: 700, fontSize: "1.05rem" }}
-          >
-            Centroid Finder
-          </Button>
-
-          {selected && (
-            <Breadcrumbs aria-label="Breadcrumb" sx={{ minWidth: 0 }}>
-              <Link component="button" type="button" underline="hover" onClick={() => navigate("/videos")}>
-                Library
-              </Link>
-              <Typography color="text.primary" noWrap>
-                {selected}
-              </Typography>
-            </Breadcrumbs>
-          )}
-        </Toolbar>
-      </AppBar>
+      <NavBar />
 
       <main className="app-main">
         <Routes>

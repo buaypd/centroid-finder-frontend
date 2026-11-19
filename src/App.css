@@ -1,21 +1,21 @@
 :root {
-  --bg: #0f1115;
-  --surface: #171a21;
-  --surface-2: #1e222b;
-  --border: #2a2f3a;
-  --text: #e8eaef;
-  --muted: #9097a6;
-  --accent: #4f8cff;
+  --bg: #f2efe8;
+  --surface: #f8f6f0;
+  --surface-2: #ebe8df;
+  --border: #cfcbc0;
+  --text: #141414;
+  --muted: #6b6a64;
+  --accent: #2b3aff;
   --accent-ink: #ffffff;
-  --good: #3ecf8e;
-  --warn: #f5b942;
-  --bad: #ff6b6b;
-  --preview: #ffd400;
-  --track: #ff4f8b;
-  --series-x: #4fc3ff;
-  --series-y: #c084fc;
-  --radius: 10px;
-  color-scheme: dark;
+  --good: #0f8f5a;
+  --warn: #a86a00;
+  --bad: #c93a3a;
+  --preview: #c99700;
+  --track: #e0336f;
+  --series-x: #1d7fd6;
+  --series-y: #8a3fd1;
+  --radius: 4px;
+  color-scheme: light;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 15px;
   line-height: 1.45;
@@ -208,3 +208,9 @@ kbd {
   .panel { position: static; }
 
 }
+
+/* ---------- On top of the video ---------- */
+
+.hover-tip { color: #fff; }
+.hover-tip .tip-miss { color: #b8bcc6; }
+.stage-message { color: #b8bcc6; }
