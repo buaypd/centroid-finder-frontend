@@ -14,7 +14,9 @@ export default defineConfig({
       '/api': SERVER,
       '/thumbnail': SERVER,
       '/process': SERVER,
-      '/videos': SERVER,
+      // Only proxy video *files* (/videos/name.mp4). A bare /videos is the
+      // React route, so it must fall through to index.html.
+      '^/videos/.+': SERVER,
       '/results': SERVER,
     },
   },
