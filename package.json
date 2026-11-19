@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "centroid-finder-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",

@@ -77,6 +77,50 @@ describe('Preview page (/preview/:filename)', () => {
     cy.contains('a', 'Download CSV').should('have.attr', 'href', '/results/test.mp4.csv');
   });
 
+  it('keeps polling through a temporary status failure', () => {
+    let polls = 0;
+
+    cy.intercept('POST', '/process/test.mp4*', { statusCode: 202, body: { jobId: 'job-flaky' } });
+    cy.intercept('GET', '/process/job-flaky/status', (req) => {
+      polls += 1;
+      if (polls === 1) req.reply({ statusCode: 500, body: { error: 'Error fetching job status' } });
+      else req.reply({ status: 'done', result: '/results/test.mp4.csv' });
+    });
+    cy.intercept('GET', '/results/test.mp4.csv', { body: '0,37,15\n' });
+
+    cy.visit('/preview/test.mp4');
+    cy.contains('button', 'Process Video with These Settings').click();
+
+    cy.contains('.MuiChip-label', 'Done', { timeout: 10000 });
+    cy.contains('a', 'Download CSV').should('exist');
+  });
+
+  it('gives up after repeated status failures', () => {
+    cy.intercept('POST', '/process/test.mp4*', { statusCode: 202, body: { jobId: 'job-down' } });
+    cy.intercept('GET', '/process/job-down/status', {
+      statusCode: 500,
+      body: { error: 'Error fetching job status' },
+    }).as('status');
+    cy.visit('/preview/test.mp4');
+    cy.contains('button', 'Process Video with These Settings').click();
+
+    cy.contains('.MuiChip-label', 'Error', { timeout: 10000 });
+    cy.get('@status.all').should('have.length', 3);
+  });
+
+  it('stops at once when the server says the job does not exist', () => {
+    cy.intercept('POST', '/process/test.mp4*', { statusCode: 202, body: { jobId: 'job-gone' } });
+    cy.intercept('GET', '/process/job-gone/status', { statusCode: 404, body: { error: 'Job ID not found' } }).as('status');
+
+    cy.visit('/preview/test.mp4');
+    cy.contains('button', 'Process Video with These Settings').click();
+
+    cy.wait('@status');
+    // The unknown job is forgotten, so the job card goes away.
+    cy.get('.job-card').should('not.exist');
+    cy.get('@status.all').should('have.length', 1);
+  });
+
   it('shows the error when the server rejects the job', () => {
     cy.intercept('POST', '/process/test.mp4*', { statusCode: 404, body: { error: 'video not found' } });
 
