@@ -49,7 +49,7 @@ function VideoLibrary({ videos, onSelect, onRefresh }) {
                         label="Tracked"
                         title={`Last run: #${saved.targetColor}, threshold ${saved.threshold}`}
                         avatar={<Box component="span" sx={{ bgcolor: `#${saved.targetColor}`, borderRadius: '50%' }} />}
-                        sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(0,0,0,0.7)' }}
+                        sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(0,0,0,0.7)', color: '#fff' }}
                       />
                     )}
                   </Box>
