@@ -1,4 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Chip,
+  FormControlLabel,
+  IconButton,
+  LinearProgress,
+  Slider,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material';
 import { fetchResultCsv, resultUrl, startJob, videoUrl } from '../api.js';
 import useJob from '../hooks/useJob.js';
 import {
@@ -378,20 +391,26 @@ export default function Workspace({ filename }) {
         </div>
 
         <div className="transport">
-          <button type="button" className="icon-btn" onClick={() => step(-1)} title="Previous frame (←)" aria-label="Previous frame">⏮</button>
-          <button type="button" className="icon-btn primary" onClick={togglePlay} title="Play / pause (space)" aria-label={playing ? 'Pause' : 'Play'}>
+          <IconButton onClick={() => step(-1)} title="Previous frame (←)" aria-label="Previous frame">⏮</IconButton>
+          <IconButton
+            color="primary"
+            onClick={togglePlay}
+            title="Play / pause (space)"
+            aria-label={playing ? 'Pause' : 'Play'}
+          >
             {playing ? '❚❚' : '▶'}
-          </button>
-          <button type="button" className="icon-btn" onClick={() => step(1)} title="Next frame (→)" aria-label="Next frame">⏭</button>
-          <input
-            className="scrubber"
-            type="range"
-            min="0"
-            max={duration || 0}
-            step="0.01"
+          </IconButton>
+          <IconButton onClick={() => step(1)} title="Next frame (→)" aria-label="Next frame">⏭</IconButton>
+          <Slider
+            size="small"
+            min={0}
+            max={duration || 1}
+            step={0.01}
             value={Math.min(currentTime, duration || 0)}
-            onChange={(e) => seek(Number(e.target.value))}
+            onChange={(_, value) => seek(value)}
+            disabled={!duration}
             aria-label="Seek"
+            sx={{ flex: 1, mx: 1 }}
           />
           <span className="time mono">
             {formatTime(currentTime)} / {formatTime(duration)}
@@ -414,15 +433,17 @@ export default function Workspace({ filename }) {
         <div className="panel-section">
           <h2>1. Target color</h2>
           <div className="row">
-            <button
-              type="button"
-              className={`btn tool ${eyedropper ? 'active' : ''}`}
+            <Button
+              variant={eyedropper ? 'contained' : 'outlined'}
+              color={eyedropper ? 'warning' : 'inherit'}
               onClick={() => setEyedropper((v) => !v)}
               aria-pressed={eyedropper}
               title="Eyedropper (E)"
+              startIcon={<span aria-hidden="true">⌖</span>}
+              sx={{ flex: 'none' }}
             >
-              <span aria-hidden="true">⌖</span> Eyedropper
-            </button>
+              Eyedropper
+            </Button>
             <ColorField value={targetColor} onChange={setTargetColor} />
           </div>
           <p className="muted small">
@@ -435,27 +456,26 @@ export default function Workspace({ filename }) {
         <div className="panel-section">
           <h2>2. Threshold</h2>
           <div className="row">
-            <input
-              className="slider"
-              type="range"
-              min="0"
+            <Slider
+              min={0}
               max={MAX_DISTANCE}
               value={threshold}
-              onChange={(e) => setThreshold(Number(e.target.value))}
-              style={{ '--fill': `${(threshold / MAX_DISTANCE) * 100}%` }}
+              onChange={(_, value) => setThreshold(value)}
               aria-label="Threshold"
+              sx={{ flex: 1, mx: 1 }}
             />
-            <input
-              className="num mono"
+            <TextField
               type="number"
-              min="0"
-              max={MAX_DISTANCE}
+              size="small"
               value={threshold}
               onChange={(e) => {
                 const v = Math.round(Number(e.target.value));
                 if (Number.isFinite(v)) setThreshold(Math.min(MAX_DISTANCE, Math.max(0, v)));
               }}
-              aria-label="Threshold value"
+              slotProps={{
+                htmlInput: { min: 0, max: MAX_DISTANCE, 'aria-label': 'Threshold value', style: { textAlign: 'right' } },
+              }}
+              sx={{ width: 84, flex: 'none' }}
             />
           </div>
           <p className="muted small">
@@ -465,30 +485,32 @@ export default function Workspace({ filename }) {
 
         <div className="panel-section">
           <h2>Preview</h2>
-          <div className="segmented" role="radiogroup" aria-label="View mode">
+          <ToggleButtonGroup
+            exclusive
+            fullWidth
+            size="small"
+            value={view}
+            onChange={(_, next) => next && setView(next)}
+            aria-label="View mode"
+            sx={{ mb: 1 }}
+          >
             {VIEW_MODES.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                role="radio"
-                aria-checked={view === m.id}
-                className={view === m.id ? 'on' : ''}
-                onClick={() => setView(m.id)}
-                title={m.hint}
-              >
+              <ToggleButton key={m.id} value={m.id} title={m.hint}>
                 {m.label}
-              </button>
+              </ToggleButton>
             ))}
-          </div>
-          <label className="check">
-            <input type="checkbox" checked={showPreview} onChange={(e) => setShowPreview(e.target.checked)} />
-            <span><i className="key-dot preview" /> Live centroid (this frame)</span>
-          </label>
+          </ToggleButtonGroup>
+          <FormControlLabel
+            sx={{ display: 'flex' }}
+            control={<Checkbox size="small" checked={showPreview} onChange={(e) => setShowPreview(e.target.checked)} />}
+            label={<span><i className="key-dot preview" /> Live centroid (this frame)</span>}
+          />
           {track && (
-            <label className="check">
-              <input type="checkbox" checked={showTrack} onChange={(e) => setShowTrack(e.target.checked)} />
-              <span><i className="key-dot track" /> Tracked path (from processor)</span>
-            </label>
+            <FormControlLabel
+              sx={{ display: 'flex' }}
+              control={<Checkbox size="small" checked={showTrack} onChange={(e) => setShowTrack(e.target.checked)} />}
+              label={<span><i className="key-dot track" /> Tracked path (from processor)</span>}
+            />
           )}
 
           {stats && (
@@ -513,24 +535,24 @@ export default function Workspace({ filename }) {
               </div>
             </dl>
           )}
-          {hint && <p className={`hint ${hint.level}`}>{hint.text}</p>}
+          {hint && <Alert severity={hint.level} sx={{ mt: 1.5 }}>{hint.text}</Alert>}
         </div>
 
         <div className="panel-section">
           <h2>3. Track the whole video</h2>
-          <button
-            type="button"
-            className="btn primary block"
+          <Button
+            variant="contained"
+            fullWidth
             onClick={runDetection}
             disabled={starting || job.status === 'processing'}
           >
             {job.status === 'processing' ? 'Processing…' : starting ? 'Starting…' : 'Process Video with These Settings'}
-          </button>
+          </Button>
           <p className="muted small">
             Sends <span className="mono">#{targetColor}</span> and threshold{' '}
             <span className="mono">{threshold}</span> to the Java processor, which finds the largest blob in every frame.
           </p>
-          {startError && <p className="hint bad" role="alert">{startError}</p>}
+          {startError && <Alert severity="error" sx={{ mt: 1.5 }}>{startError}</Alert>}
 
           {jobRun && (
             <JobCard
@@ -558,15 +580,15 @@ export default function Workspace({ filename }) {
 function previewHint(stats) {
   if (!stats) return null;
   if (stats.groups === 0) {
-    return { level: 'bad', text: 'Nothing matches in this frame. Raise the threshold or pick the color again.' };
+    return { level: 'error', text: 'Nothing matches in this frame. Raise the threshold or pick the color again.' };
   }
   if (stats.matchedFraction > 0.25) {
-    return { level: 'warn', text: 'Over a quarter of the frame matches. Lower the threshold so only the object lights up.' };
+    return { level: 'warning', text: 'Over a quarter of the frame matches. Lower the threshold so only the object lights up.' };
   }
   if (stats.groups > 50 && stats.largest < stats.framePixels * 0.001) {
-    return { level: 'warn', text: 'Lots of tiny specks and no clear blob. Try sampling a more typical part of the object.' };
+    return { level: 'warning', text: 'Lots of tiny specks and no clear blob. Try sampling a more typical part of the object.' };
   }
-  return { level: 'good', text: 'Looks trackable. Scrub through the video to check other frames, then process the video.' };
+  return { level: 'success', text: 'Looks trackable. Scrub through the video to check other frames, then process the video.' };
 }
 
 function JobCard({ job, run, summary, trackError, settingsChanged, onRestore }) {
@@ -582,10 +604,12 @@ function JobCard({ job, run, summary, trackError, settingsChanged, onRestore }) 
   return (
     <div className={`job-card ${job.status}`}>
       <div className="job-head">
-        <span className={`status-pill ${job.status}`}>
-          {job.status === 'processing' && <span className="spinner" aria-hidden="true" />}
-          {job.status === 'processing' ? 'Processing' : job.status === 'done' ? 'Done' : 'Error'}
-        </span>
+        <Chip
+          size="small"
+          variant="outlined"
+          color={job.status === 'done' ? 'success' : job.status === 'error' ? 'error' : 'primary'}
+          label={job.status === 'processing' ? 'Processing' : job.status === 'done' ? 'Done' : 'Error'}
+        />
         <span className="job-params">
           <span className="dot" style={{ background: `#${run.targetColor}` }} />
           <span className="mono">#{run.targetColor}</span> · {run.threshold}
@@ -593,16 +617,19 @@ function JobCard({ job, run, summary, trackError, settingsChanged, onRestore }) 
       </div>
 
       {job.status === 'processing' && (
-        <p className="muted small">
-          The processor is working through every frame{elapsed !== null ? ` (${elapsed}s so far)` : ''}. You can keep tuning while you wait.
-        </p>
+        <>
+          <LinearProgress sx={{ mt: 1.5 }} />
+          <p className="muted small">
+            The processor is working through every frame{elapsed !== null ? ` (${elapsed}s so far)` : ''}. You can keep tuning while you wait.
+          </p>
+        </>
       )}
 
-      {job.status === 'error' && <p className="hint bad">{job.error || 'Processing failed.'}</p>}
+      {job.status === 'error' && <Alert severity="error" sx={{ mt: 1.5 }}>{job.error || 'Processing failed.'}</Alert>}
 
       {job.status === 'done' && (
         <>
-          {trackError && <p className="hint bad">{trackError}</p>}
+          {trackError && <Alert severity="error" sx={{ mt: 1.5 }}>{trackError}</Alert>}
           {summary && (
             <dl className="stats">
               <div>
@@ -615,16 +642,18 @@ function JobCard({ job, run, summary, trackError, settingsChanged, onRestore }) 
               </div>
             </dl>
           )}
-          <a className="btn block" href={resultUrl(job.result)} download>
+          <Button variant="outlined" color="inherit" fullWidth href={resultUrl(job.result)} download sx={{ mt: 1.5 }}>
             Download CSV
-          </a>
+          </Button>
         </>
       )}
 
       {settingsChanged && (
         <p className="small changed">
           Your settings changed since this run.{' '}
-          <button type="button" className="link" onClick={onRestore}>Use the run's settings</button>
+          <Button size="small" onClick={onRestore} sx={{ p: 0, minWidth: 0, verticalAlign: 'baseline' }}>
+            Use the run's settings
+          </Button>
         </p>
       )}
     </div>

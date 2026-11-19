@@ -41,78 +41,11 @@ h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color
 
 .app { min-height: 100vh; display: flex; flex-direction: column; }
 
-
-
-
-
-
-
-
-
 .app-main { flex: 1; padding: 24px; max-width: 1500px; width: 100%; margin: 0 auto; }
 
 /* ---------- Buttons & fields ---------- */
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  cursor: pointer;
-  text-decoration: none;
-  font-weight: 500;
-  transition: background 0.15s, border-color 0.15s;
-}
-.btn:hover { border-color: #3a4150; background: #252a35; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn.primary:hover { filter: brightness(1.08); }
-.btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn.block { width: 100%; margin-top: 4px; }
-.btn.tool.active { border-color: var(--preview); color: var(--preview); background: rgba(255, 212, 0, 0.08); }
-
-.link { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; }
-
-.icon-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  font-size: 0.8rem;
-  flex: none;
-}
-.icon-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
-
-.notice {
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: var(--radius);
-}
-.notice.error { border-color: rgba(255, 107, 107, 0.5); }
-
 /* ---------- Library ---------- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255, 255, 255, 0.4); flex: none; }
 
@@ -197,7 +130,6 @@ h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color
 .tip-action { color: var(--preview); }
 
 .transport { display: flex; align-items: center; gap: 10px; }
-.scrubber { flex: 1; accent-color: var(--accent); min-width: 0; }
 .time { color: var(--muted); font-size: 0.85rem; min-width: 92px; text-align: right; }
 
 /* ---------- Side panel ---------- */
@@ -213,87 +145,6 @@ h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color
 .panel-section:last-of-type { border-bottom: 0; }
 .row { display: flex; align-items: center; gap: 10px; }
 
-.color-field {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-2);
-  padding: 3px 8px 3px 3px;
-  flex: 1;
-  min-width: 0;
-}
-.swatch-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-  position: relative;
-  flex: none;
-}
-.swatch-btn input { opacity: 0; position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
-.hash { color: var(--muted); margin-left: 8px; }
-.hex { background: none; border: 0; outline: none; width: 100%; min-width: 0; padding: 4px 2px; text-transform: lowercase; }
-
-.slider {
-  flex: 1;
-  appearance: none;
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(to right, var(--accent) var(--fill), var(--surface-2) var(--fill));
-  outline: none;
-  min-width: 0;
-}
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--text);
-  border: 3px solid var(--accent);
-  cursor: pointer;
-}
-.slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text);
-  border: 3px solid var(--accent);
-  cursor: pointer;
-}
-.num {
-  width: 64px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  text-align: right;
-}
-
-.segmented {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 3px;
-  gap: 3px;
-  margin-bottom: 10px;
-}
-.segmented button {
-  border: 0;
-  background: none;
-  border-radius: 6px;
-  padding: 6px 4px;
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-.segmented button.on { background: var(--bg); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
-
-.check { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; margin-top: 6px; cursor: pointer; }
-.check input { accent-color: var(--accent); }
 .key-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
 .key-dot.preview { background: var(--preview); }
 .key-dot.track { background: var(--track); }
@@ -308,18 +159,6 @@ h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color
 .stats dt { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .stats dd { margin: 2px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
 
-.hint {
-  margin: 10px 0 0;
-  font-size: 0.85rem;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border-left: 3px solid var(--muted);
-  background: var(--surface-2);
-}
-.hint.good { border-color: var(--good); }
-.hint.warn { border-color: var(--warn); }
-.hint.bad { border-color: var(--bad); }
-
 .job-card {
   margin-top: 14px;
   padding: 12px;
@@ -329,30 +168,6 @@ h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color
 }
 .job-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .job-params { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--muted); }
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: var(--surface-2);
-}
-.status-pill.done { color: var(--good); background: rgba(62, 207, 142, 0.12); }
-.status-pill.error { color: var(--bad); background: rgba(255, 107, 107, 0.12); }
-.status-pill.processing { color: var(--accent); background: rgba(79, 140, 255, 0.12); }
-
-.spinner {
-  width: 10px;
-  height: 10px;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 
 .changed { color: var(--warn); }
 

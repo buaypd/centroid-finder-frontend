@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Box, InputAdornment, TextField } from '@mui/material';
 
 // Swatch (opens the native color picker) plus a hex text box.
 // `value` is 6 hex digits without '#'.
@@ -14,26 +15,46 @@ export default function ColorField({ value, onChange }) {
   }
 
   return (
-    <div className="color-field">
-      <label className="swatch-btn" style={{ background: `#${value}` }} title="Choose a color">
-        <input
-          type="color"
-          value={`#${value}`}
-          onChange={(e) => onChange(e.target.value.slice(1).toLowerCase())}
-          aria-label="Target color picker"
-        />
-      </label>
-      <span className="hash mono">#</span>
-      <input
-        className="hex mono"
-        value={draft}
-        maxLength={7}
-        spellCheck="false"
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={(e) => commit(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && commit(e.currentTarget.value)}
-        aria-label="Target color hex"
-      />
-    </div>
+    <TextField
+      size="small"
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={(e) => commit(e.target.value)}
+      onKeyDown={(e) => e.key === 'Enter' && commit(e.currentTarget.value)}
+      spellCheck={false}
+      sx={{ flex: 1, minWidth: 0 }}
+      slotProps={{
+        htmlInput: { maxLength: 7, 'aria-label': 'Target color hex', className: 'mono' },
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <Box
+                component="label"
+                title="Choose a color"
+                sx={{
+                  position: 'relative',
+                  width: 24,
+                  height: 24,
+                  borderRadius: 0.75,
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  bgcolor: `#${value}`,
+                  cursor: 'pointer',
+                  mr: 0.5,
+                }}
+              >
+                <input
+                  type="color"
+                  value={`#${value}`}
+                  onChange={(e) => onChange(e.target.value.slice(1).toLowerCase())}
+                  aria-label="Target color picker"
+                  style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                />
+              </Box>
+              #
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
   );
 }

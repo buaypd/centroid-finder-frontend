@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Alert } from '@mui/material';
 import { thumbnailUrl } from '../api.js';
 import { detect, hexToRgb } from '../lib/detection.js';
 import { drawDot, paintMask } from '../lib/draw.js';
@@ -76,7 +77,7 @@ export default function PreviewPair({ filename, targetColor, threshold }) {
         </figcaption>
       </figure>
       {!frame && !error && <p className="muted small">Loading thumbnail…</p>}
-      {error && <p className="hint bad" role="alert">{error}</p>}
+      {error && <Alert severity="error">{error}</Alert>}
     </section>
   );
 }
