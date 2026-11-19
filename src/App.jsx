@@ -21,7 +21,17 @@ function VideoChooserPage() {
     navigate(`/preview/${encodeURIComponent(filename)}`);
   }
 
-  return <VideoLibrary onSelect={handleSelect} />;
+  return (
+    <>
+      <Typography variant="h4" component="h1" fontWeight={600}>
+        Videos
+      </Typography>
+      <Typography color="text.secondary" mb={2.5}>
+        Pick a video, click the object you want to follow, and tune the threshold until only it lights up.
+      </Typography>
+      <VideoLibrary onSelect={handleSelect} />
+    </>
+  );
 }
 
 // Displays the selected video's workspace.
