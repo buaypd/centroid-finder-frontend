@@ -1,40 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fetchResultCsv, startJob, videoUrl } from "../api.js";
+import useJob from "../hooks/useJob.js";
 import {
-  Alert,
-  Button,
-  Checkbox,
-  Chip,
-  FormControlLabel,
-  IconButton,
-  LinearProgress,
-  Slider,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-} from '@mui/material';
-import { fetchResultCsv, resultUrl, startJob, videoUrl } from '../api.js';
-import useJob from '../hooks/useJob.js';
-import {
-  MAX_DISTANCE,
   colorDistance,
   detect,
   hexToRgb,
   rgbToHex,
   sampleColor,
-} from '../lib/detection.js';
-import { drawCrosshair, drawTrack, paintMask } from '../lib/draw.js';
-import { formatPercent, formatTime } from '../lib/format.js';
-import { clearSavedJob, loadSavedJob, saveJob } from '../lib/savedJobs.js';
-import { parseTrackCsv, summarize } from '../lib/track.js';
-import ColorField from './ColorField.jsx';
-import PreviewPair from './PreviewPair.jsx';
-import TrackChart from './TrackChart.jsx';
-
-const VIEW_MODES = [
-  { id: 'original', label: 'Original', hint: 'The video as-is' },
-  { id: 'overlay', label: 'Highlight', hint: 'Matching pixels glow, the rest is dimmed' },
-  { id: 'mask', label: 'Mask', hint: 'Exactly what the processor sees: white = match' },
-];
+} from "../lib/detection.js";
+import { drawCrosshair, drawTrack, paintMask } from "../lib/draw.js";
+import { clearSavedJob, loadSavedJob, saveJob } from "../lib/savedJobs.js";
+import { parseTrackCsv, summarize } from "../lib/track.js";
+import HoverTip from "./HoverTip.jsx";
+import PreviewPair from "./PreviewPair.jsx";
+import PreviewSection from "./PreviewSection.jsx";
+import ProcessSection from "./ProcessSection.jsx";
+import TargetColorSection from "./TargetColorSection.jsx";
+import ThresholdSection from "./ThresholdSection.jsx";
+import TrackChart from "./TrackChart.jsx";
+import Transport from "./Transport.jsx";
 
 const FRAME_STEP = 1 / 30;
 const STATS_INTERVAL_MS = 120;
@@ -43,12 +27,14 @@ export default function Workspace({ filename }) {
   const saved = useMemo(() => loadSavedJob(filename), [filename]);
 
   // Detection settings
-  const [targetColor, setTargetColor] = useState(saved?.targetColor ?? 'ff0000');
+  const [targetColor, setTargetColor] = useState(
+    saved?.targetColor ?? "ff0000",
+  );
   const [threshold, setThreshold] = useState(saved?.threshold ?? 60);
 
   // Tools and display
   const [eyedropper, setEyedropper] = useState(!saved);
-  const [view, setView] = useState('overlay');
+  const [view, setView] = useState("overlay");
   const [showPreview, setShowPreview] = useState(true);
   const [showTrack, setShowTrack] = useState(true);
 
@@ -96,13 +82,14 @@ export default function Workspace({ filename }) {
     const h = video.videoHeight;
 
     // Grab the current frame's pixels from an offscreen canvas.
-    if (!frameCanvasRef.current) frameCanvasRef.current = document.createElement('canvas');
+    if (!frameCanvasRef.current)
+      frameCanvasRef.current = document.createElement("canvas");
     const fc = frameCanvasRef.current;
     if (fc.width !== w || fc.height !== h) {
       fc.width = w;
       fc.height = h;
     }
-    const fctx = fc.getContext('2d', { willReadFrequently: true });
+    const fctx = fc.getContext("2d", { willReadFrequently: true });
     fctx.drawImage(video, 0, 0, w, h);
     const frame = fctx.getImageData(0, 0, w, h);
     frameRef.current = frame;
@@ -111,17 +98,17 @@ export default function Workspace({ filename }) {
       overlay.width = w;
       overlay.height = h;
     }
-    const ctx = overlay.getContext('2d');
+    const ctx = overlay.getContext("2d");
     ctx.clearRect(0, 0, w, h);
 
     const s = settingsRef.current;
     const scale = Math.max(w, h) / 900;
     let result = null;
 
-    if (s.showPreview || s.view !== 'original') {
+    if (s.showPreview || s.view !== "original") {
       result = detect(frame.data, w, h, s.target, s.threshold);
 
-      if (s.view !== 'original') {
+      if (s.view !== "original") {
         let img = maskImageRef.current;
         if (!img || img.width !== w || img.height !== h) {
           img = new ImageData(w, h);
@@ -132,13 +119,17 @@ export default function Workspace({ filename }) {
       }
     }
 
-    if (s.showTrack && s.track) drawTrack(ctx, s.track, video.currentTime, scale);
+    if (s.showTrack && s.track)
+      drawTrack(ctx, s.track, video.currentTime, scale);
     if (s.showPreview && result) drawCrosshair(ctx, result.centroid, scale);
 
     setCurrentTime(video.currentTime);
 
     const now = performance.now();
-    if (result && (forceStats || now - lastStatsRef.current > STATS_INTERVAL_MS)) {
+    if (
+      result &&
+      (forceStats || now - lastStatsRef.current > STATS_INTERVAL_MS)
+    ) {
       lastStatsRef.current = now;
       setStats({
         matchedFraction: result.matchedFraction,
@@ -162,7 +153,8 @@ export default function Workspace({ filename }) {
     const video = videoRef.current;
     if (!video) return undefined;
 
-    const useVideoFrames = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+    const useVideoFrames =
+      "requestVideoFrameCallback" in HTMLVideoElement.prototype;
     let handle = null;
     let stopped = false;
 
@@ -180,7 +172,9 @@ export default function Workspace({ filename }) {
     };
     const schedule = () => {
       if (handle !== null) return;
-      handle = useVideoFrames ? video.requestVideoFrameCallback(tick) : requestAnimationFrame(tick);
+      handle = useVideoFrames
+        ? video.requestVideoFrameCallback(tick)
+        : requestAnimationFrame(tick);
     };
 
     const onPlay = () => {
@@ -194,35 +188,42 @@ export default function Workspace({ filename }) {
     };
     const onSeeked = () => render(true);
     const onLoaded = () => {
-      setVideoInfo({ width: video.videoWidth, height: video.videoHeight, duration: video.duration });
+      setVideoInfo({
+        width: video.videoWidth,
+        height: video.videoHeight,
+        duration: video.duration,
+      });
       render(true);
     };
-    const onError = () => setVideoError('This browser could not play the video. The processor can still run on it.');
+    const onError = () =>
+      setVideoError(
+        "This browser could not play the video. The processor can still run on it.",
+      );
 
-    video.addEventListener('play', onPlay);
-    video.addEventListener('pause', onPause);
-    video.addEventListener('ended', onPause);
-    video.addEventListener('seeked', onSeeked);
-    video.addEventListener('loadeddata', onLoaded);
-    video.addEventListener('error', onError);
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("ended", onPause);
+    video.addEventListener("seeked", onSeeked);
+    video.addEventListener("loadeddata", onLoaded);
+    video.addEventListener("error", onError);
     if (video.readyState >= 2) onLoaded();
 
     return () => {
       stopped = true;
       cancel();
-      video.removeEventListener('play', onPlay);
-      video.removeEventListener('pause', onPause);
-      video.removeEventListener('ended', onPause);
-      video.removeEventListener('seeked', onSeeked);
-      video.removeEventListener('loadeddata', onLoaded);
-      video.removeEventListener('error', onError);
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("ended", onPause);
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("loadeddata", onLoaded);
+      video.removeEventListener("error", onError);
     };
   }, [render]);
 
   // ---- Job lifecycle ---------------------------------------------------
 
   useEffect(() => {
-    if (job.status !== 'done' || !job.result) return undefined;
+    if (job.status !== "done" || !job.result) return undefined;
     let cancelled = false;
     setTrackError(null);
     fetchResultCsv(job.result)
@@ -259,7 +260,14 @@ export default function Workspace({ filename }) {
     }
   }
 
-  // ---- Interaction -----------------------------------------------------
+  function toggleEyedropper() {
+    setEyedropper((v) => !v);
+  }
+
+  function restoreRunSettings() {
+    setTargetColor(jobRun.targetColor);
+    setThreshold(Number(jobRun.threshold));
+  }
 
   function togglePlay() {
     const video = videoRef.current;
@@ -300,7 +308,14 @@ export default function Workspace({ filename }) {
   function handlePointerMove(e) {
     const p = pointerToPixel(e);
     if (!p) return;
-    const color = sampleColor(p.frame.data, p.frame.width, p.frame.height, p.x, p.y, 0);
+    const color = sampleColor(
+      p.frame.data,
+      p.frame.width,
+      p.frame.height,
+      p.x,
+      p.y,
+      0,
+    );
     setHover({
       x: p.x,
       y: p.y,
@@ -318,46 +333,66 @@ export default function Workspace({ filename }) {
     }
     const p = pointerToPixel(e);
     if (!p) return;
-    const color = sampleColor(p.frame.data, p.frame.width, p.frame.height, p.x, p.y, 2);
+    const color = sampleColor(
+      p.frame.data,
+      p.frame.width,
+      p.frame.height,
+      p.x,
+      p.y,
+      2,
+    );
     setTargetColor(rgbToHex(color));
   }
 
   // Keyboard shortcuts: space = play/pause, arrows = step, E = eyedropper.
   useEffect(() => {
     function onKey(e) {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === ' ') {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      )
+        return;
+      if (e.key === " ") {
         e.preventDefault();
         togglePlay();
-      } else if (e.key === 'ArrowLeft') {
+      } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         step(-1);
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === "ArrowRight") {
         e.preventDefault();
         step(1);
-      } else if (e.key.toLowerCase() === 'e') {
+      } else if (e.key.toLowerCase() === "e") {
         setEyedropper((v) => !v);
       }
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   });
 
   // ---- Derived values --------------------------------------------------
 
-  const settingsChanged = jobRun
-    && (jobRun.targetColor !== targetColor || Number(jobRun.threshold) !== Number(threshold));
+  const settingsChanged =
+    jobRun &&
+    (jobRun.targetColor !== targetColor ||
+      Number(jobRun.threshold) !== Number(threshold));
   const summary = track ? summarize(track) : null;
   const duration = videoInfo?.duration ?? 0;
-  const hint = previewHint(stats);
 
   return (
     <div className="workspace">
       <section className="stage-col">
-        <PreviewPair filename={filename} targetColor={targetColor} threshold={threshold} />
+        <PreviewPair
+          filename={filename}
+          targetColor={targetColor}
+          threshold={threshold}
+        />
         <div
           className="stage"
-          style={videoInfo ? { aspectRatio: `${videoInfo.width} / ${videoInfo.height}` } : undefined}
+          style={
+            videoInfo
+              ? { aspectRatio: `${videoInfo.width} / ${videoInfo.height}` }
+              : undefined
+          }
         >
           <video
             ref={videoRef}
@@ -368,54 +403,34 @@ export default function Workspace({ filename }) {
           />
           <canvas
             ref={overlayRef}
-            className={`overlay ${eyedropper ? 'picking' : ''}`}
+            className={`overlay ${eyedropper ? "picking" : ""}`}
             onClick={handleStageClick}
             onMouseMove={handlePointerMove}
             onMouseLeave={() => setHover(null)}
           />
           {hover && (
-            <div
-              className={`hover-tip ${hover.left > 70 ? 'flip-x' : ''} ${hover.top > 75 ? 'flip-y' : ''}`}
-              style={{ left: `${hover.left}%`, top: `${hover.top}%` }}
-            >
-              <span className="tip-swatch" style={{ background: `#${hover.hex}` }} />
-              <span className="mono">#{hover.hex}</span>
-              <span className={hover.distance < threshold ? 'tip-match' : 'tip-miss'}>
-                {Math.round(hover.distance)} {hover.distance < threshold ? '✓ match' : '✗'}
-              </span>
-              {eyedropper && <span className="tip-action">click to pick</span>}
-            </div>
+            <HoverTip
+              hover={hover}
+              threshold={threshold}
+              eyedropper={eyedropper}
+            />
           )}
-          {!videoInfo && !videoError && <div className="stage-message">Loading video…</div>}
-          {videoError && <div className="stage-message error">{videoError}</div>}
+          {!videoInfo && !videoError && (
+            <div className="stage-message">Loading video…</div>
+          )}
+          {videoError && (
+            <div className="stage-message error">{videoError}</div>
+          )}
         </div>
 
-        <div className="transport">
-          <IconButton onClick={() => step(-1)} title="Previous frame (←)" aria-label="Previous frame">⏮</IconButton>
-          <IconButton
-            color="primary"
-            onClick={togglePlay}
-            title="Play / pause (space)"
-            aria-label={playing ? 'Pause' : 'Play'}
-          >
-            {playing ? '❚❚' : '▶'}
-          </IconButton>
-          <IconButton onClick={() => step(1)} title="Next frame (→)" aria-label="Next frame">⏭</IconButton>
-          <Slider
-            size="small"
-            min={0}
-            max={duration || 1}
-            step={0.01}
-            value={Math.min(currentTime, duration || 0)}
-            onChange={(_, value) => seek(value)}
-            disabled={!duration}
-            aria-label="Seek"
-            sx={{ flex: 1, mx: 1 }}
-          />
-          <span className="time mono">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
-        </div>
+        <Transport
+          playing={playing}
+          currentTime={currentTime}
+          duration={duration}
+          onTogglePlay={togglePlay}
+          onStep={step}
+          onSeek={seek}
+        />
 
         {track && (
           <TrackChart
@@ -430,232 +445,45 @@ export default function Workspace({ filename }) {
       </section>
 
       <aside className="panel">
-        <div className="panel-section">
-          <h2>1. Target color</h2>
-          <div className="row">
-            <Button
-              variant={eyedropper ? 'contained' : 'outlined'}
-              color={eyedropper ? 'warning' : 'inherit'}
-              onClick={() => setEyedropper((v) => !v)}
-              aria-pressed={eyedropper}
-              title="Eyedropper (E)"
-              startIcon={<span aria-hidden="true">⌖</span>}
-              sx={{ flex: 'none' }}
-            >
-              Eyedropper
-            </Button>
-            <ColorField value={targetColor} onChange={setTargetColor} />
-          </div>
-          <p className="muted small">
-            {eyedropper
-              ? 'Click the object in the video to sample its color.'
-              : 'Turn on the eyedropper, or type a hex color.'}
-          </p>
-        </div>
+        <TargetColorSection
+          targetColor={targetColor}
+          onColorChange={setTargetColor}
+          eyedropper={eyedropper}
+          onToggleEyedropper={toggleEyedropper}
+        />
 
-        <div className="panel-section">
-          <h2>2. Threshold</h2>
-          <div className="row">
-            <Slider
-              min={0}
-              max={MAX_DISTANCE}
-              value={threshold}
-              onChange={(_, value) => setThreshold(value)}
-              aria-label="Threshold"
-              sx={{ flex: 1, mx: 1 }}
-            />
-            <TextField
-              type="number"
-              size="small"
-              value={threshold}
-              onChange={(e) => {
-                const v = Math.round(Number(e.target.value));
-                if (Number.isFinite(v)) setThreshold(Math.min(MAX_DISTANCE, Math.max(0, v)));
-              }}
-              slotProps={{
-                htmlInput: { min: 0, max: MAX_DISTANCE, 'aria-label': 'Threshold value', style: { textAlign: 'right' } },
-              }}
-              sx={{ width: 84, flex: 'none' }}
-            />
-          </div>
-          <p className="muted small">
-            How far a pixel's color can be from the target and still count. Lower is stricter.
-          </p>
-        </div>
+        <ThresholdSection threshold={threshold} onChange={setThreshold} />
 
-        <div className="panel-section">
-          <h2>Preview</h2>
-          <ToggleButtonGroup
-            exclusive
-            fullWidth
-            size="small"
-            value={view}
-            onChange={(_, next) => next && setView(next)}
-            aria-label="View mode"
-            sx={{ mb: 1 }}
-          >
-            {VIEW_MODES.map((m) => (
-              <ToggleButton key={m.id} value={m.id} title={m.hint}>
-                {m.label}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-          <FormControlLabel
-            sx={{ display: 'flex' }}
-            control={<Checkbox size="small" checked={showPreview} onChange={(e) => setShowPreview(e.target.checked)} />}
-            label={<span><i className="key-dot preview" /> Live centroid (this frame)</span>}
-          />
-          {track && (
-            <FormControlLabel
-              sx={{ display: 'flex' }}
-              control={<Checkbox size="small" checked={showTrack} onChange={(e) => setShowTrack(e.target.checked)} />}
-              label={<span><i className="key-dot track" /> Tracked path (from processor)</span>}
-            />
-          )}
+        <PreviewSection
+          view={view}
+          onViewChange={setView}
+          showPreview={showPreview}
+          onShowPreviewChange={setShowPreview}
+          showTrack={showTrack}
+          onShowTrackChange={setShowTrack}
+          hasTrack={Boolean(track)}
+          stats={stats}
+        />
 
-          {stats && (
-            <dl className="stats">
-              <div>
-                <dt>Matching</dt>
-                <dd>{formatPercent(stats.matchedFraction)}</dd>
-              </div>
-              <div>
-                <dt>Blobs</dt>
-                <dd>{stats.groups.toLocaleString()}</dd>
-              </div>
-              <div>
-                <dt>Largest</dt>
-                <dd>{stats.largest.toLocaleString()} px</dd>
-              </div>
-              <div>
-                <dt>Centroid</dt>
-                <dd className="mono">
-                  {stats.centroid.x < 0 ? '—' : `${stats.centroid.x}, ${stats.centroid.y}`}
-                </dd>
-              </div>
-            </dl>
-          )}
-          {hint && <Alert severity={hint.level} sx={{ mt: 1.5 }}>{hint.text}</Alert>}
-        </div>
-
-        <div className="panel-section">
-          <h2>3. Track the whole video</h2>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={runDetection}
-            disabled={starting || job.status === 'processing'}
-          >
-            {job.status === 'processing' ? 'Processing…' : starting ? 'Starting…' : 'Process Video with These Settings'}
-          </Button>
-          <p className="muted small">
-            Sends <span className="mono">#{targetColor}</span> and threshold{' '}
-            <span className="mono">{threshold}</span> to the Java processor, which finds the largest blob in every frame.
-          </p>
-          {startError && <Alert severity="error" sx={{ mt: 1.5 }}>{startError}</Alert>}
-
-          {jobRun && (
-            <JobCard
-              job={job}
-              run={jobRun}
-              summary={summary}
-              trackError={trackError}
-              settingsChanged={settingsChanged}
-              onRestore={() => {
-                setTargetColor(jobRun.targetColor);
-                setThreshold(Number(jobRun.threshold));
-              }}
-            />
-          )}
-        </div>
+        <ProcessSection
+          job={job}
+          jobRun={jobRun}
+          starting={starting}
+          startError={startError}
+          targetColor={targetColor}
+          threshold={threshold}
+          summary={summary}
+          trackError={trackError}
+          settingsChanged={settingsChanged}
+          onRun={runDetection}
+          onRestore={restoreRunSettings}
+        />
 
         <p className="muted small shortcuts">
-          <kbd>Space</kbd> play/pause · <kbd>←</kbd>/<kbd>→</kbd> step frame · <kbd>E</kbd> eyedropper
+          <kbd>Space</kbd> play/pause · <kbd>←</kbd>/<kbd>→</kbd> step frame ·{" "}
+          <kbd>E</kbd> eyedropper
         </p>
       </aside>
-    </div>
-  );
-}
-
-function previewHint(stats) {
-  if (!stats) return null;
-  if (stats.groups === 0) {
-    return { level: 'error', text: 'Nothing matches in this frame. Raise the threshold or pick the color again.' };
-  }
-  if (stats.matchedFraction > 0.25) {
-    return { level: 'warning', text: 'Over a quarter of the frame matches. Lower the threshold so only the object lights up.' };
-  }
-  if (stats.groups > 50 && stats.largest < stats.framePixels * 0.001) {
-    return { level: 'warning', text: 'Lots of tiny specks and no clear blob. Try sampling a more typical part of the object.' };
-  }
-  return { level: 'success', text: 'Looks trackable. Scrub through the video to check other frames, then process the video.' };
-}
-
-function JobCard({ job, run, summary, trackError, settingsChanged, onRestore }) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    if (job.status !== 'processing') return undefined;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [job.status]);
-
-  const elapsed = run.startedAt ? Math.max(0, Math.round((now - run.startedAt) / 1000)) : null;
-
-  return (
-    <div className={`job-card ${job.status}`}>
-      <div className="job-head">
-        <Chip
-          size="small"
-          variant="outlined"
-          color={job.status === 'done' ? 'success' : job.status === 'error' ? 'error' : 'primary'}
-          label={job.status === 'processing' ? 'Processing' : job.status === 'done' ? 'Done' : 'Error'}
-        />
-        <span className="job-params">
-          <span className="dot" style={{ background: `#${run.targetColor}` }} />
-          <span className="mono">#{run.targetColor}</span> · {run.threshold}
-        </span>
-      </div>
-
-      {job.status === 'processing' && (
-        <>
-          <LinearProgress sx={{ mt: 1.5 }} />
-          <p className="muted small">
-            The processor is working through every frame{elapsed !== null ? ` (${elapsed}s so far)` : ''}. You can keep tuning while you wait.
-          </p>
-        </>
-      )}
-
-      {job.status === 'error' && <Alert severity="error" sx={{ mt: 1.5 }}>{job.error || 'Processing failed.'}</Alert>}
-
-      {job.status === 'done' && (
-        <>
-          {trackError && <Alert severity="error" sx={{ mt: 1.5 }}>{trackError}</Alert>}
-          {summary && (
-            <dl className="stats">
-              <div>
-                <dt>Frames</dt>
-                <dd>{summary.frames.toLocaleString()}</dd>
-              </div>
-              <div>
-                <dt>Found in</dt>
-                <dd>{formatPercent(summary.foundFraction, 0)}</dd>
-              </div>
-            </dl>
-          )}
-          <Button variant="outlined" color="inherit" fullWidth href={resultUrl(job.result)} download sx={{ mt: 1.5 }}>
-            Download CSV
-          </Button>
-        </>
-      )}
-
-      {settingsChanged && (
-        <p className="small changed">
-          Your settings changed since this run.{' '}
-          <Button size="small" onClick={onRestore} sx={{ p: 0, minWidth: 0, verticalAlign: 'baseline' }}>
-            Use the run's settings
-          </Button>
-        </p>
-      )}
     </div>
   );
 }
