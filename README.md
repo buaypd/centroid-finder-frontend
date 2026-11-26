@@ -9,6 +9,10 @@ This is the frontend for the SDEV334 Centroid Finder assignment. It talks to
 the Express backend in the `centroid-finder` repo (`server/`), which runs the
 Java processor.
 
+![Demo: picking the salamander's color, tuning the threshold, and processing the video](docs/demo.gif)
+
+*The demo runs at 2× speed.*
+
 ![Video Chooser page](docs/videos-page.png)
 
 ![Preview page with the live binarized preview](docs/preview-page.png)
